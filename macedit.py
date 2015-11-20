@@ -81,7 +81,7 @@ WantedBy=multi-user.target"""
 		print "Enabling service..."
 		os.system("systemctl enable bootrandmacedit.service &> /dev/null")
 		print "Service enabled..."
-	elif "debian" in platform.platform():
+	elif "debian" in platform.platform() or "Ubuntu" in platform.platform():
 		print BASH
 	return ""
 

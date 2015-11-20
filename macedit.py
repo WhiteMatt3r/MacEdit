@@ -79,7 +79,7 @@ WantedBy=multi-user.target"""
 		file.close()
 		sleep(1)
 		print "Enabling service..."
-		os.system("systemctl enable bootrandmacedit.service &> /dev/null")
+		os.system("systemctl enable bootrandmacedit.service &>/dev/null")
 		print "Service enabled..."
 	elif "debian" in platform.platform() or "Ubuntu" in platform.platform():
 		print "Generating bash script and creating service..."
@@ -88,7 +88,7 @@ WantedBy=multi-user.target"""
 		file.close()
 		sleep(1)
 		print "Enabling the service..."
-		os.system("chmod +x /etc/init.d/bootrandmacedit; update-rc.d bootrandmacedit enable &> /dev/null")
+		os.system("chmod +x /etc/init.d/bootrandmacedit; update-rc.d bootrandmacedit enable &>/dev/null")
 		sleep(1)
 		print "Service enabled..."
 	return ""

@@ -153,4 +153,4 @@ if __name__ == "__main__":
 		else:
 			help()
 	else:
-		exit("Usage: " + argv[0] + " [-inline] <-i interface> [options --help]")
+		exit("Usage: " + argv[0] + " [-inline] [-i interface] [options --help]")

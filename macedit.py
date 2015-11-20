@@ -28,12 +28,45 @@ def sighandle(signal,frame):
 	else:
 		print("Caught signal " + str(signal));
 
+def octetGrab(interface):
+	sck = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	mac3octet = ':'.join(['%02x' % ord(char) for char in fcntl.ioctl(sck.fileno(), 0x8927,  struct.pack('256s', interface[:15]))[18:21]])
+	return mac3octet
+
 def setMAC(mac, interface):
 	os.system("ip link set dev " + interface + " down && ip link set dev " + interface + " address " + mac + " && ip link set dev " + interface + " up")
 	return "MAC address set to " + mac + " on " + interface
 
 def craftSH(interface):
-	return "Not yet implemented"
+	if "ARCH" in platform.platform():
+		print "Generating bash script..."
+		BASH = """#!/bin/bash
+hexchars="0123456789abcdef"
+end=$( for i in {1..6} ; do echo -n ${hexchars:$(( $RANDOM % 16 )):1} ; done | sed -e 's/\(..\)/:\\1/g' )
+ifconfig """ + interface + """ down
+ip link set dev """ + interface + """ address """ + octetGrab(interface) + """$end
+ifconfig """ + interface + """ up"""
+		file = open('/usr/bin/bootrandmacedit', 'w')
+		file.write(BASH)
+		file.close()
+		sleep(1)
+		print "Creating service..."
+		SERVICE = """[Unit]
+Description=Randomize MAC address on boot
+
+[Service]
+ExecStart=/usr/bin/bootrandmacedit
+
+[Install]
+WantedBy=multi-user.target"""
+		file = open('/etc/systemd/system/bootrandmacedit.service', 'w')
+		file.write(SERVICE)
+		file.close()
+		sleep(1)
+		print "Enabling service..."
+		os.system("systemctl enable bootrandmacedit.service &> /dev/null")
+		print "Service enabled..."
+	return ""
 
 def Randomize(interface):
 	new_mac = [choice(range(256)) for i in range(6)]
@@ -43,8 +76,7 @@ def Randomize(interface):
 	return setMAC(new_mac, interface)
 
 def ValidMAC(interface):
-	sck = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	mac_p1 = ':'.join(['%02x' % ord(char) for char in fcntl.ioctl(sck.fileno(), 0x8927,  struct.pack('256s', interface[:15]))[18:21]]) + ":"
+	mac_p1 = octetGrab(interface) + ":"
 	mac_p2 = [randint(0x00, 0x7f), randint(0x00, 0xff), randint(0x00, 0xff)] 
 	new_mac = mac_p1 + ':'.join(map(lambda x: "%02x" % x, mac_p2))
 	return setMAC(new_mac, interface)

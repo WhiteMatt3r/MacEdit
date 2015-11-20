@@ -38,14 +38,29 @@ def setMAC(mac, interface):
 	return "MAC address set to " + mac + " on " + interface
 
 def craftSH(interface):
-	if "ARCH" in platform.platform():
-		print "Generating bash script..."
-		BASH = """#!/bin/bash
+	BASH = """#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          macrandom
+# Required-Start:    
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Randomize mac on boot
+# Description:       Randomizes your wlan0 mac address on boot using the first 3
+#		     octets to validate the mac
+### END INIT INFO
+
+# Author: Foo Bar <foobar@baz.org>
+#
+# Please remove the "Author" lines above and replace them
+# with your own name if you copy and modify this script.
 hexchars="0123456789abcdef"
 end=$( for i in {1..6} ; do echo -n ${hexchars:$(( $RANDOM % 16 )):1} ; done | sed -e 's/\(..\)/:\\1/g' )
 ifconfig """ + interface + """ down
 ip link set dev """ + interface + """ address """ + octetGrab(interface) + """$end
 ifconfig """ + interface + """ up"""
+	if "ARCH" in platform.platform():
+		print "Generating bash script..."
 		file = open('/usr/bin/bootrandmacedit', 'w')
 		file.write(BASH)
 		file.close()
@@ -66,6 +81,8 @@ WantedBy=multi-user.target"""
 		print "Enabling service..."
 		os.system("systemctl enable bootrandmacedit.service &> /dev/null")
 		print "Service enabled..."
+	elif "debian" in platform.platform():
+		print BASH
 	return ""
 
 def Randomize(interface):

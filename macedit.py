@@ -82,7 +82,15 @@ WantedBy=multi-user.target"""
 		os.system("systemctl enable bootrandmacedit.service &> /dev/null")
 		print "Service enabled..."
 	elif "debian" in platform.platform() or "Ubuntu" in platform.platform():
-		print BASH
+		print "Generating bash script and creating service..."
+		file = open('/etc/init.d/bootrandmacedit', 'w')
+		file.write(BASH)
+		file.close()
+		sleep(1)
+		print "Enabling the service..."
+		os.system("update-rc.d enable bootrandmacedit &> /dev/null")
+		sleep(1)
+		print "Service enabled..."
 	return ""
 
 def Randomize(interface):

@@ -4,7 +4,7 @@
 import os, fcntl, socket, struct, signal, platform, netifaces
 from sys import exit, argv, executable
 from time import sleep
-from random import randint
+from random import randint, choice
 
 def clear():
 	print(chr(27) + "[2J")
@@ -20,6 +20,12 @@ YP  YP  YP YP   YP  `Y88P' Y88888P Y8888D' Y888888P    YP
                                           By: WhiteMatt3r
 	"""
 
+def sighandle(signal,frame):
+	if signal == 2:
+		exit("Shutting down...\n")
+	else:
+		print("Caught signal " + str(signal));
+
 def setMAC(mac, interface):
 	os.system("ip link set dev " + interface + " down && ip link set dev " + interface + " address " + mac + " && ip link set dev " + interface + " up")
 	return "MAC address set to " + mac + " on " + interface
@@ -28,8 +34,10 @@ def craftSH(interface):
 	return "Not yet implemented"
 
 def Randomize(interface):
-	mac = [randint(0x00, 0x7f), randint(0x00, 0x7f), randint(0x00, 0x7f), randint(0x00, 0x7f), randint(0x00, 0xff), randint(0x00, 0xff)] 
-	new_mac = ':'.join(map(lambda x: "%02x" % x, mac))
+	new_mac = [choice(range(256)) for i in range(6)]
+	new_mac[0] |= 0x02
+	new_mac[0] &= 0xfe
+	new_mac = ':'.join('%02x' % m for m in new_mac)
 	return setMAC(new_mac, interface)
 
 def ValidMAC(interface):
@@ -55,18 +63,7 @@ options = {
 	'4': Boot
 }
 
-def sighandle(signal,frame):
-	if signal == 2:
-		exit("Shutting down...\n")
-
-if __name__ == "__main__":
-
-	if os.geteuid() != 0:
-		print "This script must be run as root. Sudoing..."
-		args = ['sudo', executable] + argv + [os.environ]
-		os.execlpe('sudo', *args)
-
-	signal.signal(signal.SIGINT, sighandle)
+def interfaces():
 	clear()
 	header()
 
@@ -82,18 +79,26 @@ if __name__ == "__main__":
 			print str(x) + ") " + i
 			x+=1
 		print ""
+		print "Ctrl+C To Exit"
+		print ""
 	else:
 		exit("No interfaces found!")
 
-	iface_sel = raw_input("Please enter a choice: ")
+	iface_sel = ""
 	while len(iface_sel) <= 0:
-		iface_sel = raw_input("Please enter a choice: ")
+		try:
+			iface_sel = raw_input("Please enter a choice: ")
+		except EOFError:
+			exit("Ctrl+D Caught, exiting.")
 
 	try:
 		iface = iface_list[int(iface_sel)]
 	except IndexError:
 		exit("Please try again and enter a choice within range!")
 
+	return iface
+
+def action(iface):
 	clear()
 
 	header()
@@ -105,13 +110,29 @@ if __name__ == "__main__":
 4) Change this MAC address on boot
 	"""
 
-	option_sel = raw_input("Please enter a choice: ")
+	option_sel = ""
 	while len(option_sel) <= 0:
-		option_sel = raw_input("Please enter a choice: ")
+		try:
+			option_sel = raw_input("Please enter a choice: ")
+		except EOFError:
+			exit("Ctrl+D Caught, exiting.")
 
 	try:
 		option = options[option_sel]
 	except KeyError:
 		exit("Please try again and enter a choice within range!")
 
-	print option(iface)
+	print option(iface) + "\nReturning to main menu..."
+	sleep(3)
+
+if __name__ == "__main__":
+
+	if os.geteuid() != 0:
+		print "This script must be run as root. Sudoing..."
+		args = ['sudo', executable] + argv + [os.environ]
+		os.execlpe('sudo', *args)
+
+	signal.signal(signal.SIGINT, sighandle)
+
+	while 1:
+		action(interfaces())

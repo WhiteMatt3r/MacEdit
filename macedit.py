@@ -65,6 +65,12 @@ options = {
 	'4': Boot
 }
 
+inlineOptions = {
+	'-m': CustomMAC,
+	'-r': Randomize,
+	'-v': ValidMAC
+}
+
 def interfaces():
 	header()
 
@@ -141,13 +147,8 @@ if __name__ == "__main__":
 		if argv[2] == "-h" or argv[2] == "--help":
 			help()
 		elif "-i" in argv[2]:
-			if argv[4] == "-m":
-				CustomMAC(argv[3])
-			elif argv[4] == "-v":
-				ValidMAC(argv[3])
-				print "VALID"
-			elif argv[4] == "-r":
-				Randomize(argv[3])
+			if argv[4] == "-m" or argv[4] == "-v" or argv[4] == "-r":
+				inlineOptions[argv[4]](argv[3])
 			else:
 				help()
 		else:

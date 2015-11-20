@@ -18,6 +18,10 @@ YP  YP  YP YP   YP  `Y88P' Y88888P Y8888D' Y888888P    YP
                                           By: WhiteMatt3r
 	"""
 
+def help():
+	print "Usage: " + argv[0] + " [-inline] <-i interface> [options --help]"
+	print "-h --help    THIS SCREEN\n-i INTERFACE Interface of MAC to change\n-m           Specify a MAC address\n-r           Use a randomly generated MAC address\n-v           Use a randomly generated but valid MAC address"
+
 def sighandle(signal,frame):
 	if signal == 2:
 		exit("Shutting down...\n")
@@ -64,6 +68,7 @@ options = {
 def interfaces():
 	header()
 
+	print "You can use the inline version by specifying " + argv[0] + " -inline"
 	print "Enumerating interfaces...\n"
 
 	iface_list = netifaces.interfaces()
@@ -129,5 +134,23 @@ if __name__ == "__main__":
 
 	signal.signal(signal.SIGINT, sighandle)
 
-	while 1:
-		action(interfaces())
+	if len(argv) == 1:
+		while 1:
+			action(interfaces())
+	elif argv[1] == "-inline" and len(argv) >= 4 and len(argv) <= 5:
+		if argv[2] == "-h" or argv[2] == "--help":
+			help()
+		elif "-i" in argv[2]:
+			if argv[4] == "-m":
+				CustomMAC(argv[3])
+			elif argv[4] == "-v":
+				ValidMAC(argv[3])
+				print "VALID"
+			elif argv[4] == "-r":
+				Randomize(argv[3])
+			else:
+				help()
+		else:
+			help()
+	else:
+		exit("Usage: " + argv[0] + " [-inline] <-i interface> [options --help]")

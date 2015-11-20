@@ -88,7 +88,7 @@ WantedBy=multi-user.target"""
 		file.close()
 		sleep(1)
 		print "Enabling the service..."
-		os.system("chmod +x /etc/init.d/bootrandmacedit; update-rc.d bootrandmacedit enable &>/dev/null")
+		os.system("chmod +x /etc/init.d/bootrandmacedit; update-rc.d -f bootrandmacedit defaults &>/dev/null")
 		sleep(1)
 		print "Service enabled..."
 	return ""

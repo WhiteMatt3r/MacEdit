@@ -6,10 +6,8 @@ from sys import exit, argv, executable
 from time import sleep
 from random import randint, choice
 
-def clear():
-	print(chr(27) + "[2J")
-
 def header():
+	print(chr(27) + "[2J")
 	print """
 .88b  d88.  .d8b.   .o88b. d88888b d8888b. d888888b d888888b 
 88'YbdP`88 d8' `8b d8P  Y8 88'     88  `8D   `88'   `~~88~~' 
@@ -64,7 +62,6 @@ options = {
 }
 
 def interfaces():
-	clear()
 	header()
 
 	print "Enumerating interfaces...\n"
@@ -99,8 +96,6 @@ def interfaces():
 	return iface
 
 def action(iface):
-	clear()
-
 	header()
 
 	print """
